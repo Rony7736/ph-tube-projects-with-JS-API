@@ -9,6 +9,15 @@ function getTimeString(time){
     return `${hour} hour ${remainingMinuts} minuits ${remainingSeconds} seconds ago`;
 }
 
+const renoveActiveClass = () => {
+    const buttons = document.getElementsByClassName('category-btn')
+    console.log(buttons);
+    for(let btn of buttons){
+        btn.classList.remove('active')
+    }
+    
+}
+
 // 1 - Fetch, Load and Show Categories on html
 
 // create loadCategories
@@ -38,11 +47,48 @@ const loadCategoryVideos = (id) => {
     fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)        
     // diynamically category_id number change er jonno template string er vitore ${id} bosano hoise
 
-    .then(res => res.json())                
-    .then(data => displayVideos(data.category))
+    .then((res) => res.json())                
+    // .then(data => displayVideos(data.category))                              // age amn cilo
+    .then((data) => {
+
+        // id r class ke remove kora
+        renoveActiveClass()
+
+        // id r class ke active kora
+        const activeBtn = document.getElementById(`btn-${id}`)                // id ta uporer parameter er
+        activeBtn.classList.add('active')
+        
+        displayVideos(data.category)
+    })
     .catch(error => console.log(error))
 }
 
+const loadDetails = async (video_id) => {
+    console.log(video_id);
+
+    const uri = `https://openapi.programming-hero.com/api/phero-tube/video/${video_id}`
+    const res = await fetch(uri);
+    const data = await res.json();
+    
+    displayDetails(data.video);
+}
+
+const displayDetails = (video) => {
+    console.log(video);
+    const detailContainer = document.getElementById("modal-content")
+
+    // showmodal add korar way - 1 
+    // document.getElementById("showModalData").click();
+
+    // showmodal add korar way - 2
+    document.getElementById("customModal").showModal();
+
+    detailContainer.innerHTML = `
+        <img src="${video.thumbnail}">
+        <p>${video.description}</p>
+    `
+
+}
 /* github link er category item link theke copy
 
 const cardDemo = {
@@ -87,7 +133,7 @@ const displayVideos = (videos) => {
     else{videoContainer.classList.add("grid")}
 
     videos.forEach(video => {
-        console.log(video);
+        // console.log(video);
         const card = document.createElement('div')
 
         card.classList = 'card card-compact'
@@ -111,7 +157,7 @@ const displayVideos = (videos) => {
                         ${video.authors[0].verified === true ? `<img class="w-5 h-5" src="https://img.icons8.com/?size=48&id=98A4yZTt9abw&format=png">` : ""}
 
                     </div>
-                    <p></p>
+                    <p> <button onclick ="loadDetails('${video.video_id}')" class="btn btn-sm btn-error">details</button></p>
                 </div>
             </div>
         `
@@ -131,7 +177,7 @@ const displayCategories = (categories) => {
     const categoryContainer = document.getElementById('categories')
 
     categories.forEach((item) => {                  // categories gulor upore foreach loop chalano hoise
-        console.log(item);
+        // console.log(item);
 
         /*
         // create normal button 
@@ -148,7 +194,7 @@ const displayCategories = (categories) => {
 
         const buttonContainer = document.createElement('div');
         buttonContainer.innerHTML = `
-            <button onclick = "loadCategoryVideos(${item.category_id})" class="btn">
+            <button id="btn-${item.category_id}"  onclick = "loadCategoryVideos(${item.category_id})" class="btn category-btn">
                 ${item.category}
             </button>
         `;
