@@ -1,4 +1,13 @@
 
+function getTimeString(time){
+    // get hour minute and seconds
+    const hour = parseInt(time / 3600)
+    let remainingSeconds = time % 3600
+    const remainingMinuts = parseInt(remainingSeconds / 60)
+    remainingSeconds = remainingSeconds % 60
+
+    return `${hour} hour ${remainingMinuts} minuits ${remainingSeconds} seconds ago`;
+}
 
 // 1 - Fetch, Load and Show Categories on html
 
@@ -7,7 +16,7 @@ const loadCategories = () => {
     
     // fetch the data 
     fetch('https://openapi.programming-hero.com/api/phero-tube/categories')
-    .then(res => res.json())                // response dile the block a execute hobe
+    .then(res => res.json())                                         // response dile the block a execute hobe
     .then(data => displayCategories(data.categories))
     .catch(error => console.log(error))
 }
@@ -17,10 +26,24 @@ const loadVideos = () => {
     
     // fetch the data 
     fetch('https://openapi.programming-hero.com/api/phero-tube/videos')
-    .then(res => res.json())                // response dile the block a execute hobe
+    .then(res => res.json())                
     .then(data => displayVideos(data.videos))
     .catch(error => console.log(error))
 }
+
+const loadCategoryVideos = (id) => {
+    // alert(id)
+
+    // fetch the data 
+    fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)        
+    // diynamically category_id number change er jonno template string er vitore ${id} bosano hoise
+
+    .then(res => res.json())                
+    .then(data => displayVideos(data.category))
+    .catch(error => console.log(error))
+}
+
+/* github link er category item link theke copy
 
 const cardDemo = {
     "category_id": "1003",
@@ -41,10 +64,28 @@ const cardDemo = {
     "description": "Comedian Kevin Hart brings his unique brand of humor to life in 'Laugh at My Pain.' With 1.1K views, this show offers a hilarious and candid look into Kevin's personal stories, struggles, and triumphs. It's a laugh-out-loud experience filled with sharp wit, clever insights, and a relatable charm that keeps audiences coming back for more."
 }
 
+*/
+
 
 const displayVideos = (videos) => {
 
     const videoContainer = document.getElementById('video')
+    videoContainer.innerHTML = "";                              // button a click korar pore ager data clear er jonno
+    
+ 
+    if(videos.length === 0){
+        videoContainer.classList.remove("grid")
+        videoContainer.innerHTML = `
+        <div class="min-h-[600px] flex flex-col -gap-5 justify-center items-center">
+            <img src="./assets/Icon.png">
+            <h2 class="text-4xl font-bold text-center py-8">Oopps!! Sorry, There is no <br> content here</h2>
+        </div>
+        `; 
+
+        return;
+    }
+    else{videoContainer.classList.add("grid")}
+
     videos.forEach(video => {
         console.log(video);
         const card = document.createElement('div')
@@ -54,7 +95,7 @@ const displayVideos = (videos) => {
             <figure class="h-[300px] relative">
                 <img class="h-full w-full object-cover" src=${video.thumbnail} alt="Shoes"/>
                 ${
-                    video.others.posted_date?.length == 0 ? "" : `<span class="absolute right-2 bottom-2 bg-black rounded p-1 text-white">${video.others.posted_date}</span>`
+                    video.others.posted_date?.length == 0 ? "" : `<span class="absolute right-2 bottom-2 bg-black rounded p-1 text-white">${getTimeString(video.others.posted_date)}</span>`
                 }
                 
             </figure>
@@ -89,16 +130,32 @@ const displayVideos = (videos) => {
 const displayCategories = (categories) => {
     const categoryContainer = document.getElementById('categories')
 
-    categories.forEach((item) => {                  // categories er upore foreach loop chalano hoise
+    categories.forEach((item) => {                  // categories gulor upore foreach loop chalano hoise
         console.log(item);
 
-        // create a button
-        const button = document.createElement('button')
-        button.classList = 'btn'
-        button.innerText = item.categories
+        /*
+        // create normal button 
+
+         const button = document.createElement('button')
+         button.classList = 'btn'
+         button.innerText = item.categories
+
+         categoryContainer.append(button)
+
+        */
+
+        // create buttton with function
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.innerHTML = `
+            <button onclick = "loadCategoryVideos(${item.category_id})" class="btn">
+                ${item.category}
+            </button>
+        `;
+
 
         // add button to caregory container
-        categoryContainer.append(button)
+        categoryContainer.append(buttonContainer)
         
     })                        
 }
